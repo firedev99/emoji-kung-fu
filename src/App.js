@@ -218,60 +218,156 @@ function Game() {
     // return () => clearTimeout(tm)
   }, [gamerDamage, setPandaLife, pandaDamage, setGamerLife]);
 
+  const controlButtonStyle = {
+    borderRadius: 8,
+    // border: "2px solid orange",
+    backgroundColor: "#ffeedd",
+    fontSize: 40,
+    padding: 8,
+    margin: 8,
+    width: 48,
+    height: 48,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  };
+
   return (
-    <motion.div
-      className="App"
-      animate={{ rotate: gamerDamage > 0 ? 5 : 0 }}
-      tabIndex={0}
-      onKeyDown={function(event) {
-        switch (event.key) {
-          case "ArrowLeft":
-            setGamerPosition(p => p - 1);
-            break;
-          case "ArrowRight":
-            setGamerPosition(p => p + 1);
-            break;
-          case "a":
-            setPose(setGamerPose, "leftPunch");
-            break;
-          case "s":
-            setPose(setGamerPose, "bothPunch");
-            break;
-          case "d":
-            setPose(setGamerPose, "rightPunch");
-            break;
-          case "f":
-            setPose(setGamerPose, "block");
-            break;
-        }
+    <div
+      style={{
+        height: "100%",
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
       }}
     >
-      <LifeBar life={pandaLife} />
-      <Panda
-        position={pandaStatus.position}
-        pose={pandaStatus.pose}
-        damage={pandaDamage}
-      />
-      <Gamer
-        position={gamerPosition}
-        pose={gamerPose}
-        onLeftFistClick={function() {
-          setPose(setGamerPose, "leftPunch");
+      <motion.div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          width: "100%",
+          flex: 1,
         }}
-        onRightFistClick={function() {
-          setPose(setGamerPose, "rightPunch");
+        animate={{ rotate: gamerDamage > 0 ? 5 : 0 }}
+        tabIndex={0}
+        onKeyDown={function(event) {
+          switch (event.key) {
+            case "ArrowLeft":
+              setGamerPosition(p => p - 1);
+              break;
+            case "ArrowRight":
+              setGamerPosition(p => p + 1);
+              break;
+            case "a":
+              setPose(setGamerPose, "leftPunch");
+              break;
+            case "s":
+              setPose(setGamerPose, "bothPunch");
+              break;
+            case "d":
+              setPose(setGamerPose, "rightPunch");
+              break;
+            case "f":
+              setPose(setGamerPose, "block");
+              break;
+          }
         }}
-      />
-      <LifeBar life={gamerLife} />
-      💥
-    </motion.div>
+      >
+        <LifeBar life={pandaLife} />
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+          }}
+        >
+          <Panda
+            position={pandaStatus.position}
+            pose={pandaStatus.pose}
+            damage={pandaDamage}
+          />
+          <Gamer
+            position={gamerPosition}
+            pose={gamerPose}
+            onLeftFistClick={function() {
+              setPose(setGamerPose, "leftPunch");
+            }}
+            onRightFistClick={function() {
+              setPose(setGamerPose, "rightPunch");
+            }}
+          />
+        </div>
+        <LifeBar life={gamerLife} />
+      </motion.div>
+      {/* Control buttons */}
+      <div style={{ display: "flex" }}>
+        <motion.span
+          style={{ ...controlButtonStyle, rotate: 90, scaleX: -1 }}
+          onTap={function() {
+            setPose(setGamerPose, "leftPunch");
+          }}
+        >
+          🤛
+        </motion.span>
+        <motion.span
+          style={{ ...controlButtonStyle, rotate: 90 }}
+          onTap={function() {
+            setPose(setGamerPose, "rightPunch");
+          }}
+        >
+          🤛
+        </motion.span>
+        <motion.span
+          style={{ ...controlButtonStyle }}
+          onTap={function() {
+            setPose(setGamerPose, "bothPunch");
+          }}
+        >
+          🙌
+        </motion.span>
+        <motion.span
+          style={{ ...controlButtonStyle }}
+          onTap={function() {
+            setPose(setGamerPose, "block");
+          }}
+        >
+          🖐
+        </motion.span>
+        <motion.span
+          style={{ ...controlButtonStyle, rotate: 180 }}
+          onTap={function() {
+            setGamerPosition(p => p - 1);
+          }}
+        >
+          ➜
+        </motion.span>
+        <motion.span
+          style={{ ...controlButtonStyle }}
+          onTap={function() {
+            setGamerPosition(p => p + 1);
+          }}
+        >
+          ➜
+        </motion.span>
+      </div>
+    </div>
   );
 }
 
 export default function App() {
   return (
-    <>
+    <div
+      style={{
+        height: "100vh",
+        padding: 32,
+        margin: 0,
+        boxSizing: "border-box",
+      }}
+    >
       <Game />
-    </>
+    </div>
   );
 }
