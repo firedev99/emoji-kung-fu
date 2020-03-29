@@ -202,6 +202,7 @@ function Game() {
   }
 
   useEffect(() => {
+    if (pandaLife === 0 || gamerLife === 0) return;
     const tm = setTimeout(() => {
       setPandaStatus(s =>
         getNextMove({
@@ -272,8 +273,8 @@ function Game() {
 
   // update life
   useEffect(() => {
-    setGamerLife(l => l - gamerDamage);
-    setPandaLife(l => l - pandaDamage);
+    setGamerLife(l => Math.max(0, l - gamerDamage));
+    setPandaLife(l => Math.max(0, l - pandaDamage));
     // const tm = setTimeout(() => {
     //   setGamerLife(l => l - gamerDamage)
     //   setPandaLife(l => l - pandaDamage)
@@ -282,6 +283,7 @@ function Game() {
   }, [gamerDamage, setPandaLife, pandaDamage, setGamerLife]);
 
   useEffect(() => {
+    if (pandaLife === 0 || gamerLife === 0) return;
     const handleKeyDown = function(event) {
       switch (event.key) {
         case "ArrowLeft":
@@ -306,7 +308,7 @@ function Game() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  });
+  }, [gamerLife, pandaLife]);
 
   const controlButtonStyle = {
     borderRadius: 8,
@@ -370,6 +372,43 @@ function Game() {
           />
         </div>
         <LifeBar life={gamerLife} />
+        <AnimatePresence>
+          {(pandaLife === 0 || gamerLife === 0) && (
+            <motion.div
+              style={{
+                position: "absolute",
+                fontSize: 90,
+                textShadow: "0px 0px 10px #ee8abb",
+                top: 200,
+                color: "red",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              initial={{ rotate: -180 }}
+              animate={{ rotate: 0 }}
+            >
+              <div>K.O.</div>
+              <div
+                style={{
+                  fontSize: 50,
+                  color: pandaLife === 0 ? "green" : "red",
+                }}
+              >
+                {pandaLife === 0 ? "YOU WIN" : "YOU LOST"}
+              </div>
+              {/* <button
+                onClick={function() {
+                  setPandaLife(maxLife);
+                  setGamerLife(maxLife);
+                }}
+              >
+                Fight Again
+              </button> */}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </div>
   );
