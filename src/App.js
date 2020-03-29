@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import "./panda.css";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
-const maxLife = 10;
+const maxLife = 20;
 const moveSpeed = 40;
 
-function Panda({ position, pose, damage }) {
+function Panda({ position, pose, damage, fistImpact }) {
   const leftFistStyle =
     pose === "block"
       ? { scale: 1.2, x: 30 }
@@ -20,6 +20,7 @@ function Panda({ position, pose, damage }) {
       : { scale: 3, x: 0 };
   const fistStyle = {
     display: "inline-block",
+    position: "relative",
     fontSize: 40,
   };
   return (
@@ -40,6 +41,18 @@ function Panda({ position, pose, damage }) {
         style={fistStyle}
       >
         👊
+        <AnimatePresence>
+          {["both", "left"].includes(fistImpact) && (
+            <motion.span
+              style={{ position: "absolute", left: 0, top: 0 }}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: [1, 0] }}
+              transition={{ delay: 0.5, duration: 0.5 }}
+            >
+              💥
+            </motion.span>
+          )}
+        </AnimatePresence>
       </motion.span>
       🐼
       <motion.span
@@ -52,6 +65,18 @@ function Panda({ position, pose, damage }) {
         }}
       >
         👊
+        <AnimatePresence>
+          {["both", "right"].includes(fistImpact) && (
+            <motion.span
+              style={{ position: "absolute", left: 0, top: 0 }}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: [1, 0] }}
+              transition={{ delay: 0.5, duration: 0.5 }}
+            >
+              💥
+            </motion.span>
+          )}
+        </AnimatePresence>
       </motion.span>
     </motion.span>
   );
@@ -124,14 +149,14 @@ function LifeBar({ life }) {
       style={{
         border: `1px solid ${lifeColor}`,
         width: 250,
-        height: 30,
+        height: 10,
         borderRadius: 5,
       }}
     >
-      <div
+      <motion.div
+        animate={{ width: `${Math.floor((life / maxLife) * 100)}%` }}
         style={{
           height: "100%",
-          width: `${Math.floor((life / maxLife) * 100)}%`,
           backgroundColor: lifeColor,
         }}
       />
@@ -192,20 +217,58 @@ function Game() {
     return () => clearTimeout(tm);
   }, [pandaStatus, gamerPosition, gamerPose, pandaLife, gamerLife]);
 
-  function getDamage(myPosition, enemyPosition, enemyPose) {
-    return ["leftPunch", "rightPunch", "bothPunch"].includes(enemyPose) &&
-      Math.abs(myPosition - enemyPosition) <= 2
-      ? 2
+  function getDamage({ myStatus, enemyStatus }) {
+    function oneFistDamage(offset) {
+      const distance = Math.abs(offset);
+      const blockedDamage = d => d;
+      // Math.max(0, d - myStatus.pose === "block" ? 1 : 0);
+      switch (distance) {
+        case 0:
+          return blockedDamage(4);
+        case 1:
+          return blockedDamage(2);
+        case 2:
+          return blockedDamage(1);
+        default:
+          return 0;
+      }
+    }
+
+    const leftFistDamage = ["leftPunch", "bothPunch"].includes(enemyStatus.pose)
+      ? oneFistDamage(enemyStatus.position - 1 - myStatus.position)
       : 0;
+    const rightFistDamage = ["rightPunch", "bothPunch"].includes(
+      enemyStatus.pose
+    )
+      ? oneFistDamage(enemyStatus.position + 1 - myStatus.position)
+      : 0;
+    return [
+      leftFistDamage + rightFistDamage,
+      leftFistDamage > 0 && rightFistDamage > 0
+        ? "both"
+        : leftFistDamage > 0
+        ? "left"
+        : rightFistDamage > 0
+        ? "right"
+        : "none",
+    ];
   }
 
-  const gamerDamage = getDamage(
-    gamerPosition,
-    pandaStatus.position,
-    pandaStatus.pose
-  );
+  const [gamerDamage, pandaFistImpact] = getDamage({
+    myStatus: {
+      position: gamerPosition,
+      pose: gamerPosition,
+    },
+    enemyStatus: pandaStatus,
+  });
 
-  const pandaDamage = getDamage(pandaStatus.position, gamerPosition, gamerPose);
+  const [pandaDamage, gamerFistImpact] = getDamage({
+    myStatus: pandaStatus,
+    enemyStatus: {
+      position: gamerPosition,
+      pose: gamerPose,
+    },
+  });
 
   // update life
   useEffect(() => {
@@ -292,9 +355,11 @@ function Game() {
             position={pandaStatus.position}
             pose={pandaStatus.pose}
             damage={pandaDamage}
+            fistImpact={pandaFistImpact}
           />
           <Gamer
             position={gamerPosition}
+            fistImpact={gamerFistImpact}
             pose={gamerPose}
             onLeftFistClick={function() {
               setPose(setGamerPose, "leftPunch");
@@ -306,57 +371,6 @@ function Game() {
         </div>
         <LifeBar life={gamerLife} />
       </motion.div>
-      {/* Control buttons */}
-      <div style={{ display: "flex" }}>
-        <motion.span
-          style={{ ...controlButtonStyle, rotate: 90, scaleX: -1 }}
-          onTap={function() {
-            setPose(setGamerPose, "leftPunch");
-          }}
-        >
-          🤛
-        </motion.span>
-        <motion.span
-          style={{ ...controlButtonStyle, rotate: 90 }}
-          onTap={function() {
-            setPose(setGamerPose, "rightPunch");
-          }}
-        >
-          🤛
-        </motion.span>
-        <motion.span
-          style={{ ...controlButtonStyle }}
-          onTap={function() {
-            setPose(setGamerPose, "bothPunch");
-          }}
-        >
-          🙌
-        </motion.span>
-        <motion.span
-          style={{ ...controlButtonStyle }}
-          onTap={function() {
-            setPose(setGamerPose, "block");
-          }}
-        >
-          🖐
-        </motion.span>
-        <motion.span
-          style={{ ...controlButtonStyle, rotate: 180 }}
-          onTap={function() {
-            setGamerPosition(p => p - 1);
-          }}
-        >
-          ➜
-        </motion.span>
-        <motion.span
-          style={{ ...controlButtonStyle }}
-          onTap={function() {
-            setGamerPosition(p => p + 1);
-          }}
-        >
-          ➜
-        </motion.span>
-      </div>
     </div>
   );
 }
@@ -366,6 +380,7 @@ export default function App() {
     <div
       style={{
         height: "100vh",
+        maxHeight: 800,
         padding: 32,
         margin: 0,
         boxSizing: "border-box",
