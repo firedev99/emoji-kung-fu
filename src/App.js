@@ -218,6 +218,33 @@ function Game() {
     // return () => clearTimeout(tm)
   }, [gamerDamage, setPandaLife, pandaDamage, setGamerLife]);
 
+  useEffect(() => {
+    const handleKeyDown = function(event) {
+      switch (event.key) {
+        case "ArrowLeft":
+          setGamerPosition(p => p - 1);
+          break;
+        case "ArrowRight":
+          setGamerPosition(p => p + 1);
+          break;
+        case "a":
+          setPose(setGamerPose, "leftPunch");
+          break;
+        case "s":
+          setPose(setGamerPose, "bothPunch");
+          break;
+        case "d":
+          setPose(setGamerPose, "rightPunch");
+          break;
+        case "f":
+          setPose(setGamerPose, "block");
+          break;
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  });
+
   const controlButtonStyle = {
     borderRadius: 8,
     // border: "2px solid orange",
@@ -251,29 +278,6 @@ function Game() {
           flex: 1,
         }}
         animate={{ rotate: gamerDamage > 0 ? 5 : 0 }}
-        tabIndex={0}
-        onKeyDown={function(event) {
-          switch (event.key) {
-            case "ArrowLeft":
-              setGamerPosition(p => p - 1);
-              break;
-            case "ArrowRight":
-              setGamerPosition(p => p + 1);
-              break;
-            case "a":
-              setPose(setGamerPose, "leftPunch");
-              break;
-            case "s":
-              setPose(setGamerPose, "bothPunch");
-              break;
-            case "d":
-              setPose(setGamerPose, "rightPunch");
-              break;
-            case "f":
-              setPose(setGamerPose, "block");
-              break;
-          }
-        }}
       >
         <LifeBar life={pandaLife} />
         <div
