@@ -63,12 +63,28 @@ function Gamer({ position, pose, onLeftFistClick, onRightFistClick }) {
     fontSize: 80,
     opacity: 0.3,
   };
-  const leftFistAnimate = ["idle", "rightPunch"].includes(pose)
-    ? { y: 0, scale: 1 }
-    : { y: -60, scale: 0.6 };
-  const rightFistAnimate = ["idle", "leftPunch"].includes(pose)
-    ? { y: 0, scale: 1 }
-    : { y: -60, scale: 0.6 };
+  const leftFistAnimate =
+    pose === "block"
+      ? {
+          rotateY: 0,
+          y: 0,
+          x: 10,
+          scale: 1,
+        }
+      : ["idle", "rightPunch"].includes(pose)
+      ? { x: 0, y: 0, scale: 1, rotateY: 30 }
+      : { x: 0, y: -60, scale: 0.6, rotateY: 30 };
+  const rightFistAnimate =
+    pose === "block"
+      ? {
+          rotateY: 0,
+          y: 0,
+          x: -10,
+          scale: 1,
+        }
+      : ["idle", "leftPunch"].includes(pose)
+      ? { x: 0, y: 0, scale: 1, rotateY: 30 }
+      : { x: 0, y: -60, scale: 0.6, rotateY: 30 };
 
   return (
     <motion.div animate={{ x: position * moveSpeed }}>
