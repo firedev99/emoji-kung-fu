@@ -386,8 +386,8 @@ function Game() {
                 justifyContent: "center",
                 alignItems: "center",
               }}
-              initial={{ rotate: -180 }}
-              animate={{ rotate: 0 }}
+              initial={{ rotate: -180, scale: 0 }}
+              animate={{ rotate: 0, scale: 1 }}
             >
               <div>K.O.</div>
               <div
@@ -396,7 +396,7 @@ function Game() {
                   color: pandaLife === 0 ? "green" : "red",
                 }}
               >
-                {pandaLife === 0 ? "YOU WIN" : "YOU LOST"}
+                {pandaLife === 0 ? "YOU WIN" : "YOU LOSE"}
               </div>
               {/* <button
                 onClick={function() {
