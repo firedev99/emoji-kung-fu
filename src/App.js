@@ -449,6 +449,7 @@ function createPuncherFaces(initialFace) {
 }
 
 function PuncherChooser({ onPuncherChange }) {
+  const [uploadImageDataUrl, setUploadImageDataUrl] = useState(null);
   const punchers = ["🐼", "🐵", "🤨", "🐯", "🐷"].map((p) =>
     p === "🤨"
       ? {
@@ -466,7 +467,44 @@ function PuncherChooser({ onPuncherChange }) {
       alignItems: "center",
     },
     puncher: { fontSize: 80, cursor: "pointer", margin: 10 },
+    uploaderText: { fontSize: 20 },
   };
+  const uploader = (
+    <div>
+      <h2>Or upload your own enemy:</h2>
+      <input
+        type="file"
+        onChange={(e) => {
+          const file = e.target.files[0];
+          console.log(file);
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            console.log(event);
+            setUploadImageDataUrl(event.target.result);
+          };
+          reader.readAsDataURL(file);
+        }}
+      />
+      {uploadImageDataUrl && (
+        <>
+          <div>
+            <img src={uploadImageDataUrl} width={70} />
+          </div>
+          <button
+            style={styles.uploaderText}
+            onClick={() =>
+              typeof onPuncherChange &&
+              onPuncherChange(
+                createPuncherFaces(<img src={uploadImageDataUrl} width={70} />)
+              )
+            }
+          >
+            Go punch
+          </button>
+        </>
+      )}
+    </div>
+  );
   return (
     <div style={styles.container}>
       <h1>Choose Your Opponent</h1>
@@ -483,10 +521,11 @@ function PuncherChooser({ onPuncherChange }) {
             {p.id}
           </motion.div>
         ))}
-        <motion.div style={styles.puncher} whileHover={{ scale: 1.4 }}>
+        {/* <motion.div style={styles.puncher} whileHover={{ scale: 1.4 }}>
           📲
-        </motion.div>
+        </motion.div> */}
       </div>
+      {uploader}
     </div>
   );
 }
