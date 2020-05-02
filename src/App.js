@@ -421,8 +421,31 @@ function Game({ puncher }) {
   );
 }
 
-function createPuncherExpressions(puncher) {
-  return {};
+function createPuncherFaces(initialFace) {
+  const mark = (sym, style) => (
+    <span style={{ position: "absolute", fontSize: 20, ...style }}>{sym}</span>
+  );
+
+  return {
+    losingFaces: [
+      initialFace,
+      <span style={{ position: "relative" }}>
+        {initialFace}
+        {mark("💢", { left: 10, top: 20 })}
+      </span>,
+      <span style={{ position: "relative" }}>
+        {initialFace}
+        {mark("❗️", { left: 10, top: 50 })}
+        {mark("❗️", { left: 50, top: 50 })}
+      </span>,
+      <span style={{ position: "relative" }}>
+        {initialFace}
+        {mark("❌", { left: 10, top: 35 })}
+        {mark("❌", { left: 50, top: 35 })}
+      </span>,
+    ],
+    winningFaces: [initialFace],
+  };
 }
 
 function PuncherChooser({ onPuncherChange }) {
@@ -433,7 +456,7 @@ function PuncherChooser({ onPuncherChange }) {
           losingFaces: ["🤨", "🤪", "😤", "😭", "😵"],
           winningFaces: ["🤨", "🥴", "😆", "🤣", "🥳"],
         }
-      : { id: p, ...createPuncherExpressions(p) }
+      : { id: p, ...createPuncherFaces(p) }
   );
   const styles = {
     container: {
@@ -468,9 +491,29 @@ function PuncherChooser({ onPuncherChange }) {
   );
 }
 
+function PuncherStorybook() {
+  const { losingFaces, winningFaces } = createPuncherFaces("🐼");
+  const allFaces = (faces) =>
+    Array(faces.length)
+      .fill(0)
+      .map((_, idx) => (
+        <>
+          <Puncher face={faces[idx]} pose="idle" />
+          <div style={{ margin: 10 }} />
+        </>
+      ));
+  const containerStyle = { display: "flex" };
+  return (
+    <div>
+      <div style={containerStyle}>{allFaces(losingFaces)}</div>
+      <div style={containerStyle}>{allFaces(winningFaces)}</div>
+    </div>
+  );
+}
+
 export default function App() {
   const [puncher, setPuncher] = useState({ damage0: "🐼" });
-  const [activeUI, setActiveUI] = useState("puncher-chooser");
+  const [activeUI, setActiveUI] = useState("puncher-chooser"); //"face-debug");
   return (
     <div
       style={{
@@ -484,7 +527,9 @@ export default function App() {
         alignItems: "center",
       }}
     >
-      {activeUI === "puncher-chooser" ? (
+      {activeUI === "face-debug" ? (
+        <PuncherStorybook />
+      ) : activeUI === "puncher-chooser" ? (
         <PuncherChooser
           onPuncherChange={(p) => {
             setPuncher(p);
