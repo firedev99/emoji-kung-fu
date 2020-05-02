@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 const maxLife = 20;
 const moveSpeed = 40;
 
-function Panda({ position, pose, damage, fistImpact }) {
+function Puncher({ face, position, pose, damage, fistImpact }) {
   const leftFistStyle =
     pose === "block"
       ? { scale: 1.2, x: 30 }
@@ -54,7 +54,7 @@ function Panda({ position, pose, damage, fistImpact }) {
           )}
         </AnimatePresence>
       </motion.span>
-      🐼
+      {face}
       <motion.span
         animate={rightFistStyle}
         role="img"
@@ -173,7 +173,7 @@ const poses = ["block", "leftPunch", "rightPunch", "bothPunch"];
 
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
-const clampPosition = p => clamp(p, -5, 5);
+const clampPosition = (p) => clamp(p, -5, 5);
 
 function getNextMove({ myStatus, enemyStatus }) {
   return {
@@ -187,7 +187,7 @@ function getNextMove({ myStatus, enemyStatus }) {
   };
 }
 
-function Game() {
+function Game({ puncher }) {
   const [gamerPosition, setGamerPosition] = useState(0);
   const [gamerPose, setGamerPose] = useState("idle");
   const [pandaStatus, setPandaStatus] = useState({ position: 0, pose: "idle" });
@@ -204,7 +204,7 @@ function Game() {
   useEffect(() => {
     if (pandaLife === 0 || gamerLife === 0) return;
     const tm = setTimeout(() => {
-      setPandaStatus(s =>
+      setPandaStatus((s) =>
         getNextMove({
           myStatus: { ...s, life: pandaLife },
           enemyStatus: {
@@ -221,7 +221,7 @@ function Game() {
   function getDamage({ myStatus, enemyStatus }) {
     function oneFistDamage(offset) {
       const distance = Math.abs(offset);
-      const blockedDamage = d => d;
+      const blockedDamage = (d) => d;
       // Math.max(0, d - myStatus.pose === "block" ? 1 : 0);
       switch (distance) {
         case 0:
@@ -273,8 +273,8 @@ function Game() {
 
   // update life
   useEffect(() => {
-    setGamerLife(l => Math.max(0, l - gamerDamage));
-    setPandaLife(l => Math.max(0, l - pandaDamage));
+    setGamerLife((l) => Math.max(0, l - gamerDamage));
+    setPandaLife((l) => Math.max(0, l - pandaDamage));
     // const tm = setTimeout(() => {
     //   setGamerLife(l => l - gamerDamage)
     //   setPandaLife(l => l - pandaDamage)
@@ -284,13 +284,13 @@ function Game() {
 
   useEffect(() => {
     if (pandaLife === 0 || gamerLife === 0) return;
-    const handleKeyDown = function(event) {
+    const handleKeyDown = function (event) {
       switch (event.key) {
         case "ArrowLeft":
-          setGamerPosition(p => p - 1);
+          setGamerPosition((p) => p - 1);
           break;
         case "ArrowRight":
-          setGamerPosition(p => p + 1);
+          setGamerPosition((p) => p + 1);
           break;
         case "a":
           setPose(setGamerPose, "leftPunch");
@@ -353,7 +353,14 @@ function Game() {
             justifyContent: "center",
           }}
         >
-          <Panda
+          <Puncher
+            face={(function getFace() {
+              const face = (faces, life) =>
+                faces[Math.floor((1 - life / maxLife) * (faces.length - 1))];
+              return pandaLife > gamerLife
+                ? face(puncher.winningFaces, gamerLife)
+                : face(puncher.losingFaces, pandaLife);
+            })()}
             position={pandaStatus.position}
             pose={pandaStatus.pose}
             damage={pandaDamage}
@@ -363,10 +370,10 @@ function Game() {
             position={gamerPosition}
             fistImpact={gamerFistImpact}
             pose={gamerPose}
-            onLeftFistClick={function() {
+            onLeftFistClick={function () {
               setPose(setGamerPose, "leftPunch");
             }}
-            onRightFistClick={function() {
+            onRightFistClick={function () {
               setPose(setGamerPose, "rightPunch");
             }}
           />
@@ -414,7 +421,56 @@ function Game() {
   );
 }
 
+function createPuncherExpressions(puncher) {
+  return {};
+}
+
+function PuncherChooser({ onPuncherChange }) {
+  const punchers = ["🐼", "🐵", "🤨", "🐯", "🐷"].map((p) =>
+    p === "🤨"
+      ? {
+          id: p,
+          losingFaces: ["🤨", "🤪", "😤", "😭", "😵"],
+          winningFaces: ["🤨", "🥴", "😆", "🤣", "🥳"],
+        }
+      : { id: p, ...createPuncherExpressions(p) }
+  );
+  const styles = {
+    container: {
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    puncher: { fontSize: 80, cursor: "pointer", margin: 10 },
+  };
+  return (
+    <div style={styles.container}>
+      <h1>Choose Your Opponent</h1>
+      <div style={{ display: "flex" }}>
+        {punchers.map((p) => (
+          <motion.div
+            key={p.id}
+            whileHover={{ scale: 1.4 }}
+            style={styles.puncher}
+            onClick={() =>
+              typeof onPuncherChange === "function" && onPuncherChange(p)
+            }
+          >
+            {p.id}
+          </motion.div>
+        ))}
+        <motion.div style={styles.puncher} whileHover={{ scale: 1.4 }}>
+          📲
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
+  const [puncher, setPuncher] = useState({ damage0: "🐼" });
+  const [activeUI, setActiveUI] = useState("puncher-chooser");
   return (
     <div
       style={{
@@ -423,9 +479,21 @@ export default function App() {
         padding: 32,
         margin: 0,
         boxSizing: "border-box",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
       }}
     >
-      <Game />
+      {activeUI === "puncher-chooser" ? (
+        <PuncherChooser
+          onPuncherChange={(p) => {
+            setPuncher(p);
+            setActiveUI("game");
+          }}
+        />
+      ) : (
+        <Game puncher={puncher} />
+      )}
     </div>
   );
 }
