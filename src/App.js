@@ -446,13 +446,13 @@ function createPuncherFaces(initialFace) {
       </span>,
       <span style={{ position: "relative" }}>
         {initialFace}
-        {mark("❗️", { left: 10, top: 50 })}
-        {mark("❗️", { left: 50, top: 50 })}
+        {mark("❗️", { left: 14, top: 50 })}
+        {mark("❗️", { left: 44, top: 50 })}
       </span>,
       <span style={{ position: "relative" }}>
         {initialFace}
-        {mark("❌", { left: 10, top: 35 })}
-        {mark("❌", { left: 50, top: 35 })}
+        {mark("❌", { left: 14, top: 35 })}
+        {mark("❌", { left: 44, top: 35 })}
       </span>,
     ],
     winningFaces: [initialFace],
@@ -562,7 +562,8 @@ function PuncherStorybook() {
 
 export default function App() {
   const [puncher, setPuncher] = useState({ damage0: "🐼" });
-  const [activeUI, setActiveUI] = useState("puncher-chooser"); //"face-debug");
+  const [activeUI, setActiveUI] = useState("puncher-chooser");
+  // const [activeUI, setActiveUI] = useState("face-debug");
   return (
     <div
       style={{
