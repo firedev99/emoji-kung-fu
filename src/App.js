@@ -187,7 +187,7 @@ function getNextMove({ myStatus, enemyStatus }) {
   };
 }
 
-function Game({ puncher }) {
+function Game({ puncher, onSwitchPuncher }) {
   const [gamerPosition, setGamerPosition] = useState(0);
   const [gamerPose, setGamerPose] = useState("idle");
   const [pandaStatus, setPandaStatus] = useState({ position: 0, pose: "idle" });
@@ -379,43 +379,54 @@ function Game({ puncher }) {
           />
         </div>
         <LifeBar life={gamerLife} />
-        <AnimatePresence>
-          {(pandaLife === 0 || gamerLife === 0) && (
-            <motion.div
-              style={{
-                position: "absolute",
-                fontSize: 90,
-                textShadow: "0px 0px 10px #ee8abb",
-                top: 200,
-                color: "red",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-              initial={{ rotate: -180, scale: 0 }}
-              animate={{ rotate: 0, scale: 1 }}
-            >
-              <div>K.O.</div>
-              <div
+        {(pandaLife === 0 || gamerLife === 0) && (
+          <AnimatePresence>
+            {
+              <motion.div
                 style={{
-                  fontSize: 50,
-                  color: pandaLife === 0 ? "green" : "red",
+                  position: "absolute",
+                  fontSize: 90,
+                  textShadow: "0px 0px 10px #ee8abb",
+                  top: 200,
+                  color: "red",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
+                initial={{ rotate: -180, scale: 0 }}
+                animate={{ rotate: 0, scale: 1 }}
               >
-                {pandaLife === 0 ? "YOU WIN" : "YOU LOSE"}
-              </div>
-              {/* <button
-                onClick={function() {
-                  setPandaLife(maxLife);
-                  setGamerLife(maxLife);
-                }}
-              >
-                Fight Again
-              </button> */}
-            </motion.div>
-          )}
-        </AnimatePresence>
+                <div>K.O.</div>
+                <div
+                  style={{
+                    fontSize: 50,
+                    color: pandaLife === 0 ? "green" : "red",
+                  }}
+                >
+                  {pandaLife === 0 ? "YOU WIN" : "YOU LOSE"}
+                </div>
+                <button
+                  style={{ fontSize: 20, marginBottom: 20 }}
+                  onClick={function () {
+                    setPandaLife(maxLife);
+                    setGamerLife(maxLife);
+                  }}
+                >
+                  Fight Again
+                </button>
+                <button
+                  style={{ fontSize: 20 }}
+                  onClick={function () {
+                    typeof onSwitchPuncher === "function" && onSwitchPuncher();
+                  }}
+                >
+                  Switch Opponent
+                </button>
+              </motion.div>
+            }
+          </AnimatePresence>
+        )}
       </motion.div>
     </div>
   );
@@ -476,7 +487,6 @@ function PuncherChooser({ onPuncherChange }) {
         type="file"
         onChange={(e) => {
           const file = e.target.files[0];
-          console.log(file);
           const reader = new FileReader();
           reader.onload = (event) => {
             console.log(event);
@@ -576,7 +586,12 @@ export default function App() {
           }}
         />
       ) : (
-        <Game puncher={puncher} />
+        <Game
+          puncher={puncher}
+          onSwitchPuncher={() => {
+            setActiveUI("puncher-chooser");
+          }}
+        />
       )}
     </div>
   );
